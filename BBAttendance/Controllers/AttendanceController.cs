@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BBAttendance.Controllers
 {
@@ -8,19 +9,29 @@ namespace BBAttendance.Controllers
     public class AttendanceController : ControllerBase
     {
         private readonly DataContext _context;
+        private readonly IUserService _userService;
 
-        public AttendanceController(DataContext context)
+        public AttendanceController(DataContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
-        [HttpGet]
+        [HttpGet("whoami"),Authorize]
+        public async Task<ActionResult<string>> Whoami()
+        {
+            var userName = _userService.GetMyName();
+            return Ok(userName);
+        }
+
+
+        [HttpGet, Authorize]
         public async Task<ActionResult<List<Attendance>>> Get()
         {
             return Ok(await _context.Attendances.ToListAsync());
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}"), Authorize]
         public async Task<ActionResult<Attendance>> Get(int id)
         {
             var data = await _context.Attendances.FindAsync(id);
@@ -38,7 +49,7 @@ namespace BBAttendance.Controllers
             return Ok(await _context.Attendances.ToListAsync());
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize]
         public async Task<ActionResult<List<Attendance>>> Delete(int id)
         {
             var dbAttendance = await _context.Attendances.FindAsync(id);

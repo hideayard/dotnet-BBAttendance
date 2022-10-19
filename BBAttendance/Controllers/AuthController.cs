@@ -22,11 +22,18 @@ namespace BBAttendance.Controllers
             _configuration = configuration;
             _userService = userService;
             _context = context;
-
         }
 
         [HttpGet, Authorize]
         public ActionResult<string> GetMe()
+        {
+            var userName = _userService.GetMyName();
+            return Ok(userName);
+        }
+
+        [HttpGet("whoami")]
+        [Authorize]
+        public async Task<ActionResult<string>> Whoami()
         {
             var userName = _userService.GetMyName();
             return Ok(userName);
@@ -50,20 +57,22 @@ namespace BBAttendance.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDto request)
         {
-            if (user.Username != request.Username)
+            var userExists = await _context.Users.FirstOrDefaultAsync(x => x.Username == request.Username);
+
+            if (userExists == null)
             {
                 return BadRequest("User not found.");
             }
 
-            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+            if (!VerifyPasswordHash(request.Password, userExists.PasswordHash, userExists.PasswordSalt))
             {
                 return BadRequest("Wrong password.");
             }
-
-            string token = CreateToken(user);
+            string token = CreateToken(userExists);
 
             var refreshToken = GenerateRefreshToken();
-            SetRefreshToken(refreshToken);
+            SetRefreshToken(userExists,refreshToken);
+            await _context.SaveChangesAsync();
 
             return Ok(token);
         }
@@ -84,7 +93,8 @@ namespace BBAttendance.Controllers
 
             string token = CreateToken(user);
             var newRefreshToken = GenerateRefreshToken();
-            SetRefreshToken(newRefreshToken);
+            SetRefreshToken(user,newRefreshToken);
+            await _context.SaveChangesAsync();
 
             return Ok(token);
         }
@@ -101,7 +111,7 @@ namespace BBAttendance.Controllers
             return refreshToken;
         }
 
-        private void SetRefreshToken(RefreshToken newRefreshToken)
+        private void SetRefreshToken(User user, RefreshToken newRefreshToken)
         {
             var cookieOptions = new CookieOptions
             {
@@ -119,8 +129,9 @@ namespace BBAttendance.Controllers
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, "Admin")
+                new Claim("userid", user.Id.ToString()),
+                new Claim("name", user.Username),
+                new Claim("role", "Admin")
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
