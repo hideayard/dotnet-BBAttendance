@@ -361,3 +361,17 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+BBAttendance/.vscode/launch.json
+BBAttendance/.vscode/tasks.json
+BBAttendance/bin/Debug/net6.0/appsettings.json
+BBAttendance/bin/Debug/net6.0/BBAttendance.dll
+BBAttendance/bin/Debug/net6.0/BBAttendance.pdb
+BBAttendance/obj/staticwebassets.pack.sentinel
+BBAttendance/obj/Debug/net6.0/BBAttendance.assets.cache
+BBAttendance/obj/Debug/net6.0/BBAttendance.csproj.CoreCompileInputs.cache
+BBAttendance/obj/Debug/net6.0/BBAttendance.dll
+BBAttendance/obj/Debug/net6.0/BBAttendance.GeneratedMSBuildEditorConfig.editorconfig
+BBAttendance/obj/Debug/net6.0/BBAttendance.pdb
+BBAttendance/obj/Debug/net6.0/project.razor.json
+BBAttendance/obj/Debug/net6.0/ref/BBAttendance.dll
+BBAttendance/obj/Debug/net6.0/refint/BBAttendance.dll
